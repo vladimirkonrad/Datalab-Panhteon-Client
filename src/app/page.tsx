@@ -1,88 +1,42 @@
+"use client";
 import Image from "next/image";
+import { useState, useEffect } from 'react';
+import {DatePicker} from "@nextui-org/date-picker";
+
+interface SalesData {
+  MP: string;
+  Naziv: string;
+  BrojRacuna: number;
+  Pazar: string;
+  PazarNoFormat: number;
+}
+
+interface TotalSales {
+  Pazar: string;
+  PazarNoFormat: number;
+}
+
+interface ApiResponse {
+  result1: SalesData[];
+  result2: TotalSales[];
+}
 
 export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="flex flex-col gap-4">
+        <DatePicker label="Pick date" className="max-w-[284px]" />
+        
+          <h1 className="text-2xl font-bold">Daily Sales Report</h1>
+          <DailySales />
         </div>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
+  
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          href="https://vladimirkonrad.com"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -93,9 +47,69 @@ export default function Home() {
             width={16}
             height={16}
           />
-          Go to nextjs.org →
+          Go to vladimirkonrad.com →
         </a>
       </footer>
+    </div>
+  );
+}
+
+function DailySales() {
+  const [salesData, setSalesData] = useState<ApiResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSales = async () => {
+      try {
+        const response = await fetch('/api/sales');
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const data = await response.json();
+        setSalesData(data);
+      } catch (err) {
+        console.error('Fetch error:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSales();
+  }, []);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!salesData) return <div>No data available</div>;
+
+  return (
+    <div className="w-full max-w-4xl">
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-400">
+              <th className="p-2 text-left">Store</th>
+              <th className="p-2 text-right">Receipts</th>
+              <th className="p-2 text-right">Sales</th>
+            </tr>
+          </thead>
+          <tbody>
+            {salesData.result1.map((store) => (
+              <tr key={store.MP} className="border-b">
+                <td className="p-2">{store.Naziv}</td>
+                <td className="p-2 text-right">{store.BrojRacuna}</td>
+                <td className="p-2 text-right">{store.Pazar}</td>
+              </tr>
+            ))}
+            <tr className="font-bold bg-gray-400">
+              <td className="p-2">Total</td>
+              <td className="p-2 text-right">
+                {salesData.result1.reduce((acc, store) => acc + store.BrojRacuna, 0)}
+              </td>
+              <td className="p-2 text-right">{salesData.result2[0].Pazar}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
