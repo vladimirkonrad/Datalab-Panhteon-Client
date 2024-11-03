@@ -2,8 +2,12 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const pickdate = '2024-11-02'; //just for testing
-    
+    var pickdate = '2024-11-02'; //just for testing
+ 
+  
+    console.log(pickdate);
+
+
     const response = await fetch(`${process.env.API_SERVER_ROOT}/api/getDnevniPazar?date=${pickdate}`, {
       headers: {
         'Accept': 'application/json',
