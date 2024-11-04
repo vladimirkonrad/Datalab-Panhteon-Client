@@ -2,9 +2,12 @@
 import Image from "next/image";
 import { useState, useEffect} from 'react';
 import {DatePicker} from "@nextui-org/date-picker";
-import {now, parseAbsoluteToLocal} from "@internationalized/date";
+import {parseAbsoluteToLocal} from "@internationalized/date";
 import React from "react";
 
+
+
+  
 interface SalesData {
   MP: string;
   Naziv: string;
@@ -24,8 +27,11 @@ interface ApiResponse {
 }
 
 export default function Home() {
- 
-  let [date, setDate] = React.useState(parseAbsoluteToLocal(new Date().toISOString()));
+
+  const [date, setDate] = React.useState(parseAbsoluteToLocal(new Date().toISOString()));
+
+  // Format date to yyyy-mm-dd
+  const formattedDate = date.toString().slice(0, 10); // Get the first 10 characters (yyyy-mm-dd)
 
   return (
    
@@ -33,11 +39,23 @@ export default function Home() {
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <div className="flex flex-col gap-4">
-        
-        <DatePicker label="Pick date" className="max-w-[284px]" value={date} onChange={setDate} />
-        
+       
+       <DatePicker 
+          className="max-w-md"
+          granularity="day"
+          label="Pick date"
+          description={"The date for which we are requesting the report"}
+          labelPlacement="inside"
+
+          // hourCycle='24'
+          
+          size="lg"
+           value={date}
+           onChange={setDate}
+        />
+
           <h1 className="text-2xl font-bold">Daily Sales Report</h1>
-          <DailySales />
+          <DailySales date={formattedDate} />
         </div>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
@@ -55,14 +73,14 @@ export default function Home() {
             width={16}
             height={16}
           />
-          Go to vladimirkonrad.com →
+          made by vladimirkonrad.com →
         </a>
       </footer>
     </div>
   );
 }
 
-function DailySales() {
+function DailySales({ date }: { date: string }) {
   const [salesData, setSalesData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +88,7 @@ function DailySales() {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const response = await fetch('/api/sales');
+        const response = await fetch(`/api/sales?date=${date.toString()}`);
         if (!response.ok) throw new Error('Failed to fetch data');
         const data = await response.json();
         setSalesData(data);
@@ -83,7 +101,7 @@ function DailySales() {
     };
 
     fetchSales();
-  }, []);
+  }, [date]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;

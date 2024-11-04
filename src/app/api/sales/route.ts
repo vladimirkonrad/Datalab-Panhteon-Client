@@ -1,9 +1,13 @@
+
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request){
+  const { searchParams } = new URL(request.url);
+  const pickdate = searchParams.get('date');
+  
   try {
-    var pickdate = '2024-11-02'; //just for testing
- 
+  //  var pickdate = '2024-11-02'; //just for testing
+  //  var pickdate = new Date().toISOString().split('T')[0];
   
     console.log(pickdate);
 
