@@ -2,12 +2,27 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import styles from './Navbar.module.css';
+// import { supabase } from '../lib/supabaseClient';// Import the Supabase client
+
+import { supabase } from '@/lib/supabaseClient';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error logging out:', error.message);
+    } else {
+      // Optionally, redirect or show a message after logout
+      console.log('Logged out successfully');
+      // You can redirect to the home page or another page if needed
+      window.location.href = '/'; // Redirect to home page
+    }
   };
 
   return (
@@ -34,6 +49,9 @@ const Navbar = () => {
           <Link href="/" className={styles.navLink}>
             Home
           </Link>
+          <Link href="/salesreport" className={styles.navLink}>
+            Sales Report
+          </Link>
           <Link href="/about" className={styles.navLink}>
             About
           </Link>
@@ -43,6 +61,12 @@ const Navbar = () => {
           <Link href="/contact" className={styles.navLink}>
             Contact
           </Link>
+          <button 
+            onClick={handleLogout} 
+            className={styles.navLink}
+          >
+            Logout
+          </button>
         </div>
       </div>
     </nav>
