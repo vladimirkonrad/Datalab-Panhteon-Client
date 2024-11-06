@@ -3,8 +3,10 @@
 import Image from "next/image";
 import { useState, useEffect } from 'react';
 import { DatePicker } from "@nextui-org/date-picker";
-import { parseAbsoluteToLocal } from "@internationalized/date";
+import { now, parseAbsoluteToLocal } from "@internationalized/date";
 import React from "react";
+import {NextUIProvider} from "@nextui-org/react";
+import {Calendar as CalendarIcon} from "lucide-react";
 
 
 interface SalesData {
@@ -30,23 +32,36 @@ export default function SalesReport() {
   const formattedDate = date.toString().slice(0, 10);
 
   return (
+    
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <div className="flex flex-col gap-4">
-          <DatePicker 
-            className="base text-black dark:text-white"
+    
+      <main className="flex flex-col gap-2 row-start-2  bg-orange-100">
+      <DatePicker className="text-orange-500 font-light text-sm border border-orange-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent w-full" label="" name="dueDate"  granularity="day" isRequired selectorIcon={ <span className="w-5 h-5 text-orange-500"> <CalendarIcon /> </span> } popoverProps={{ placement: "bottom", shouldFlip: false, backdrop: "opaque", className: "bg-white text-orange-500 border border-orange-300 rounded-md shadow-lg p-2", }}   />
+  
+      <DatePicker
             granularity="day"
             label="Pick date"
-            description={"The date for which we are requesting the report"}
+            className="max-w-[120px] p-2 self-center" 
+            variant="flat"
+            // description={"pick date on calendar icon"}
             labelPlacement="inside"
             size="lg"
             value={date}
             onChange={setDate}
-          />
+            visibleMonths={3}
+            classNames={{
+              calendar: "bg-white",
+            }}
+         
+        />
+      
+        <div className="flex flex-col gap-4 bg-blue-100">
+
           <h1 className="text-2xl font-bold">Daily Sales Report</h1>
           <DailySales date={formattedDate} />
         </div>
       </main>
+    
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
@@ -62,8 +77,10 @@ export default function SalesReport() {
             height={16}
           />
           made by vladimirkonrad.com →
-        </a>
+        </a> 
+     
       </footer>
+      
     </div>
   );
 }
@@ -100,7 +117,7 @@ function DailySales({ date }: { date: string }) {
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse">
           <thead>
-            <tr className="bg-gray-400">
+            <tr className="bg-blue-400">
               <th className="p-2 text-left">Store</th>
               <th className="p-2 text-right">Receipts</th>
               <th className="p-2 text-right">Sales</th>
@@ -114,7 +131,7 @@ function DailySales({ date }: { date: string }) {
                 <td className="p-2 text-right">{store.Pazar}</td>
               </tr>
             ))}
-            <tr className="font-bold bg-gray-400">
+            <tr className="font-bold bg-blue-400">
               <td className="p-2">Total</td>
               <td className="p-2 text-right">
                 {salesData.result1.reduce((acc, store) => acc + store.BrojRacuna, 0)}

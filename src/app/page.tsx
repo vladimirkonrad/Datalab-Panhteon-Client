@@ -1,8 +1,3 @@
-export default async function Home() {
-  return (
-    <div>
-          <h1>Welcome back </h1>
-    </div>
-
-  );
+export default function Page() {
+  return <h1 className="text-3xl font-bold underline">Hello, Next.js!</h1>
 }
